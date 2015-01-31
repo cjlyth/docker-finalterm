@@ -28,15 +28,18 @@ RUN echo 'deb http://http.us.debian.org/debian/ testing non-free contrib main' \
 ENV SRC_VERSION master
 ENV SRC_TAR_URL https://github.com/p-e-w/finalterm/archive/master.tar.gz
 ENV SRC_REPO_URL https://github.com/p-e-w/finalterm.git
+ENV SRC_DIR /usr/src/finalterm
+
+ENV DESTDIR /opt/finalterm
+VOLUME ["/opt/finalterm"]
+VOLUME ["/usr/src/finalterm/build"]
+COPY entrypoint.sh /usr/local/bin/
 
 WORKDIR /usr/src/finalterm
 RUN mkdir -p /usr/src/finalterm \
  && curl -sSL $SRC_TAR_URL \
-	| tar -xz --strip-components=1
-
-VOLUME ["/usr/src/finalterm/build"]
-
-COPY entrypoint.sh /usr/local/bin/
+	| tar -xz --strip-components=1 \
+ && chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["bash"]
+CMD ["cmake"]
 

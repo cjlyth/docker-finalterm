@@ -1,25 +1,35 @@
 #!/bin/bash
 set -e
-
-# Need to fix the make script
-
-#  && mkdir -p build \
-#  && cd build \
-#  && cmake .. \
-#  && make \
-#  && make install
-# CMAKE_INSTALL_PREFIX
-# RUN cd /usr/src/go/src && ./make.bash --no-clean 2>&1
-
-# ENV PATH /usr/src/go/bin:$PATH
-
-# RUN mkdir -p /go/src
-# ENV GOPATH /go
-# ENV PATH /go/bin:$PATH
-# WORKDIR /go
-
-# COPY docker-build-entrypoint.sh /usr/local/bin/
-
-
-
-exec "${@}"
+# /etc/lsb-base-logging.sh
+[[ -s "/lib/lsb/init-functions" ]] && {
+	. /lib/lsb/init-functions
+}
+log_action_msg "Preparing the Final Term build"; 
+cmd="$1"; shift;
+case "$cmd" in
+	cmake)
+		cd $SRC_DIR/build;
+		execCommand=( $cmd .. "$@" )
+		log_success_msg "Executing \"${execCommand[@]}\""
+		set -x; exec "${execCommand[@]}"
+		;;
+	make)
+		cd $SRC_DIR/build;
+		execCommand=( $cmd "$@" )
+		log_success_msg "Executing \"${execCommand[@]}\""
+		set -x; exec "${execCommand[@]}"
+		;;
+	install)
+		execCommand=( make "--directory=build" "install" )
+		log_success_msg "Executing \"${execCommand[@]}\""
+		set -x; exec "${execCommand[@]}"
+		;;
+	*)
+		log_warning_msg 'Executing unknown command:' "$cmd";
+		exec "$cmd" "${@}" 
+		# exit $?
+		# log_end_msg 4 'error: unknown command:' "$cmd"
+		;;
+esac
+# exec "${@}"
+exit $?
